@@ -109,4 +109,36 @@ class ProjectInput {
   }
 }
 
+class ProjectList {
+  templateElement: HTMLTemplateElement
+  hostElement: HTMLDivElement
+  element: HTMLFormElement
+
+  constructor(input: string) {
+    this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement
+    this.hostElement = document.getElementById('app')! as HTMLDivElement
+
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    )
+    this.element = importedNode.firstElementChild as HTMLFormElement
+    this.element.id = `${input}-projects`
+
+    this.renderProjects(input)
+    this.attach()
+  }
+
+  private renderProjects(input: string) {
+    this.element.querySelector('h2')!.textContent = `${input.toUpperCase()} PROJECTS`
+  }
+
+  private attach() {
+    this.hostElement.insertAdjacentElement('beforeend', this.element)
+  }
+
+}
+
 const prjInput = new ProjectInput()
+const activeProjects = new ProjectList('active')
+const finishedProjects = new ProjectList('finished')

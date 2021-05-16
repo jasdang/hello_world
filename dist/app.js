@@ -78,5 +78,24 @@ class ProjectInput {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
     }
 }
+class ProjectList {
+    constructor(input) {
+        this.templateElement = document.getElementById('project-list');
+        this.hostElement = document.getElementById('app');
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild;
+        this.element.id = `${input}-projects`;
+        this.renderProjects(input);
+        this.attach();
+    }
+    renderProjects(input) {
+        this.element.querySelector('h2').textContent = `${input.toUpperCase()} PROJECTS`;
+    }
+    attach() {
+        this.hostElement.insertAdjacentElement('beforeend', this.element);
+    }
+}
 const prjInput = new ProjectInput();
+const activeProjects = new ProjectList('active');
+const finishedProjects = new ProjectList('finished');
 //# sourceMappingURL=app.js.map
