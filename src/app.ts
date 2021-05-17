@@ -29,6 +29,35 @@ function validate(input: Validatable) {
   return isValid
 }
 
+class ProjectState {
+  static instance: ProjectState
+  private listeners: any[] = []
+  private constructor(private projects: any[]) {
+  }
+
+  static getInstance() {
+    if (ProjectState.instance) {
+      return this.instance
+    } else {
+      this.instance = new ProjectState([])
+      return this.instance
+    }
+  }
+
+  addProject(title: string, description: string, people: number) {
+    this.projects.push({title, description, people})
+    for (const listenerFn of this.listeners) {
+      listenerFn(this.projects.slice())
+    }
+  }
+
+  addListener(listener: Function) {
+    this.listeners.push(listener)
+  }
+}
+
+const projectState = ProjectState.getInstance()
+
 class ProjectInput {
   templateElement: HTMLTemplateElement
   hostElement: HTMLDivElement
@@ -95,7 +124,8 @@ class ProjectInput {
     const userInput = this.gatherUserInput()
     if (Array.isArray(userInput)) {
       const [title, desc, people] = userInput
-      console.log(title, desc, people)
+      projectState.addProject(title, desc, people)
+
     }
     this.clearInput()
   }
@@ -112,9 +142,9 @@ class ProjectInput {
 class ProjectList {
   templateElement: HTMLTemplateElement
   hostElement: HTMLDivElement
-  element: HTMLFormElement
-
-  constructor(input: string) {
+  element: HTMLElement
+  assignedProjects: any[] = []
+  constructor(private input: string) {
     this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement
     this.hostElement = document.getElementById('app')! as HTMLDivElement
 
@@ -122,15 +152,31 @@ class ProjectList {
       this.templateElement.content,
       true
     )
-    this.element = importedNode.firstElementChild as HTMLFormElement
+    this.element = importedNode.firstElementChild as HTMLElement
     this.element.id = `${input}-projects`
 
-    this.renderProjects(input)
+    projectState.addListener((projects: any[]) => {
+      this.assignedProjects = projects
+      this.renderProjects()
+    })
+
+    this.renderContents()
     this.attach()
   }
 
-  private renderProjects(input: string) {
-    this.element.querySelector('h2')!.textContent = `${input.toUpperCase()} PROJECTS`
+  private renderProjects() {
+    const listEl = document.getElementById(`${this.input}-projects-list`)
+    for (const assignedProject of this.assignedProjects) {
+      const newEl = document.createElement('li')!
+      newEl.textContent = assignedProject.title
+      listEl?.appendChild(newEl)
+    }
+  }
+
+  private renderContents() {
+    const listId = `${this.input}-projects-list`
+    this.element.querySelector('ul')!.id = listId
+    this.element.querySelector('h2')!.textContent = `${this.input.toUpperCase()} PROJECTS`
   }
 
   private attach() {
@@ -142,3 +188,5 @@ class ProjectList {
 const prjInput = new ProjectInput()
 const activeProjects = new ProjectList('active')
 const finishedProjects = new ProjectList('finished')
+
+projectState.addProject('one', 'description', 3)
