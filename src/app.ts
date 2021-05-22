@@ -29,10 +29,16 @@ function validate(input: Validatable) {
   return isValid
 }
 
+type Project = {
+  title: string
+  description: string
+  people: number
+}
+
 class ProjectState {
   static instance: ProjectState
   private listeners: any[] = []
-  private constructor(private projects: any[]) {
+  private constructor(private projects: Project[]) {
   }
 
   static getInstance() {
@@ -44,8 +50,8 @@ class ProjectState {
     }
   }
 
-  addProject(title: string, description: string, people: number) {
-    this.projects.push({title, description, people})
+  addProject(project: Project) {
+    this.projects.push(project)
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice())
     }
@@ -123,8 +129,8 @@ class ProjectInput {
     event.preventDefault()
     const userInput = this.gatherUserInput()
     if (Array.isArray(userInput)) {
-      const [title, desc, people] = userInput
-      projectState.addProject(title, desc, people)
+      const [title, description, people] = userInput
+      projectState.addProject({title, description, people})
 
     }
     this.clearInput()
@@ -189,4 +195,4 @@ const prjInput = new ProjectInput()
 const activeProjects = new ProjectList('active')
 const finishedProjects = new ProjectList('finished')
 
-projectState.addProject('one', 'description', 3)
+projectState.addProject({title: 'one', description: 'description', people: 3})
