@@ -18,6 +18,20 @@ function validate(input) {
     }
     return isValid;
 }
+var ProjectStatus;
+(function (ProjectStatus) {
+    ProjectStatus[ProjectStatus["Active"] = 0] = "Active";
+    ProjectStatus[ProjectStatus["Finished"] = 1] = "Finished";
+})(ProjectStatus || (ProjectStatus = {}));
+class Project {
+    constructor(id, title, description, people, status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.people = people;
+        this.status = status;
+    }
+}
 class ProjectState {
     constructor(projects) {
         this.projects = projects;
@@ -32,7 +46,9 @@ class ProjectState {
             return this.instance;
         }
     }
-    addProject(project) {
+    addProject(title, description, people) {
+        const id = ProjectState.getInstance().projects.length + 1;
+        const project = new Project(id.toString(), title, description, people, ProjectStatus.Active);
         this.projects.push(project);
         for (const listenerFn of this.listeners) {
             listenerFn(this.projects.slice());
@@ -92,7 +108,7 @@ class ProjectInput {
         const userInput = this.gatherUserInput();
         if (Array.isArray(userInput)) {
             const [title, description, people] = userInput;
-            projectState.addProject({ title, description, people });
+            projectState.addProject(title, description, people);
         }
         this.clearInput();
     }
@@ -121,10 +137,12 @@ class ProjectList {
     }
     renderProjects() {
         const listEl = document.getElementById(`${this.input}-projects-list`);
+        listEl.innerHTML = '';
         for (const assignedProject of this.assignedProjects) {
             const newEl = document.createElement('li');
             newEl.textContent = assignedProject.title;
             listEl === null || listEl === void 0 ? void 0 : listEl.appendChild(newEl);
+            console.log(assignedProject);
         }
     }
     renderContents() {
@@ -139,5 +157,5 @@ class ProjectList {
 const prjInput = new ProjectInput();
 const activeProjects = new ProjectList('active');
 const finishedProjects = new ProjectList('finished');
-projectState.addProject({ title: 'one', description: 'description', people: 3 });
+projectState.addProject('one', 'description', 3);
 //# sourceMappingURL=app.js.map

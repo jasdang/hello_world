@@ -29,10 +29,19 @@ function validate(input: Validatable) {
   return isValid
 }
 
-type Project = {
-  title: string
-  description: string
-  people: number
+enum ProjectStatus {
+  Active,
+  Finished
+}
+
+class Project {
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
 }
 
 type Listener = (input: Project[]) => void
@@ -52,7 +61,9 @@ class ProjectState {
     }
   }
 
-  addProject(project: Project) {
+  addProject(title: string, description: string, people: number) {
+    const id = ProjectState.getInstance().projects.length + 1
+    const project = new Project(id.toString(), title, description, people, ProjectStatus.Active)
     this.projects.push(project)
     for (const listenerFn of this.listeners) {
       listenerFn(this.projects.slice())
@@ -132,7 +143,7 @@ class ProjectInput {
     const userInput = this.gatherUserInput()
     if (Array.isArray(userInput)) {
       const [title, description, people] = userInput
-      projectState.addProject({title, description, people})
+      projectState.addProject(title, description, people)
 
     }
     this.clearInput()
@@ -173,11 +184,13 @@ class ProjectList {
   }
 
   private renderProjects() {
-    const listEl = document.getElementById(`${this.input}-projects-list`)
+    const listEl = document.getElementById(`${this.input}-projects-list`)! as HTMLUListElement
+    listEl.innerHTML = ''
     for (const assignedProject of this.assignedProjects) {
       const newEl = document.createElement('li')!
       newEl.textContent = assignedProject.title
       listEl?.appendChild(newEl)
+      console.log(assignedProject)
     }
   }
 
@@ -197,4 +210,4 @@ const prjInput = new ProjectInput()
 const activeProjects = new ProjectList('active')
 const finishedProjects = new ProjectList('finished')
 
-projectState.addProject({title: 'one', description: 'description', people: 3})
+projectState.addProject('one', 'description', 3)
