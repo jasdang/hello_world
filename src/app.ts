@@ -35,9 +35,11 @@ type Project = {
   people: number
 }
 
+type Listener = (input: Project[]) => void
+
 class ProjectState {
   static instance: ProjectState
-  private listeners: any[] = []
+  private listeners: Listener[] = []
   private constructor(private projects: Project[]) {
   }
 
@@ -57,7 +59,7 @@ class ProjectState {
     }
   }
 
-  addListener(listener: Function) {
+  addListener(listener: Listener) {
     this.listeners.push(listener)
   }
 }
